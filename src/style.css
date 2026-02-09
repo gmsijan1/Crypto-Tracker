@@ -1,0 +1,282 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* ===== Common Styles ===== */
+
+.page-bg {
+  background-color: #101720;
+}
+
+.error-container {
+  padding: 20px;
+  color: white;
+  text-align: center;
+  background-color: #101720;
+}
+
+/* ===== Header Styles ===== */
+
+.header-top {
+  display: flex;
+  background-color: #181818;
+  color: gold;
+  align-items: center;
+}
+
+.header-title {
+  margin: auto;
+  cursor: pointer;
+}
+
+.currency-select {
+  margin: 20px;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+}
+
+.login-btn {
+  margin-right: 20px;
+  padding: 9px 16px;
+  background-color: gold;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ===== Modal Styles ===== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #37353e;
+  padding: 30px 40px;
+  border-radius: 8px;
+  text-align: center;
+  color: white;
+  min-width: 300px;
+}
+
+.modal-close-btn {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: gold;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ===== Banner Styles ===== */
+
+.banner-container {
+  color: white;
+  padding: 20px 30px;
+  text-align: center;
+}
+
+.banner-coins {
+  display: flex;
+  overflow-x: auto;
+  gap: 3rem;
+}
+
+.banner-coin-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  text-transform: uppercase;
+  min-width: 80px;
+}
+
+.price-change {
+  margin-left: 5px;
+}
+
+.price-change.profit {
+  color: lime;
+}
+
+.price-change.loss {
+  color: red;
+}
+
+/* ===== Coins Table Styles ===== */
+
+.coins-table-container {
+  text-align: center;
+  color: white;
+  background-color: #181818;
+  padding-top: 20px;
+  min-height: 100vh;
+}
+
+.search-input {
+  margin-bottom: 20px;
+  width: 70%;
+  padding: 15px 0;
+  border: 1px solid white;
+  border-radius: 10px;
+  background-color: #303030;
+  color: white;
+}
+
+.coin-image {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: auto;
+}
+
+th {
+  border: 1px solid #ccc;
+  padding: 11px;
+  background-color: gold;
+  color: black;
+}
+
+td {
+  border: 1px solid #ccc;
+  padding: 30px;
+  border-left: none;
+  border-right: none;
+}
+
+tr:hover {
+  background-color: #101720;
+}
+
+td.profit {
+  color: green;
+}
+
+td.loss {
+  color: red;
+}
+
+/* ===== Pagination Styles ===== */
+
+.pagination-container {
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  margin: 5px;
+  padding: 8px 12px;
+  font-size: 17px;
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pagination-btn.active {
+  background-color: #aaa;
+  color: white;
+}
+
+.pagination-btn:hover {
+  opacity: 0.8;
+}
+
+/* ===== Coin Page Styles ===== */
+
+.coin-page-container {
+  padding: 20px;
+  background-color: #101720;
+  color: white;
+  text-align: center;
+  min-height: 100vh;
+}
+
+/* ===== Coin Info Styles ===== */
+
+.coin-info-container {
+  padding-top: 60px;
+}
+
+.error-text {
+  color: red;
+}
+
+.chart-buttons {
+  margin: 30px auto;
+  text-align: center;
+}
+
+.chart-btn {
+  margin-right: 20px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid gray;
+  background-color: #37353e;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.chart-btn.active {
+  border: 2px solid gold;
+  background-color: #222;
+}
+
+.chart-btn:hover {
+  opacity: 0.8;
+}
+
+/* ===== Error Boundary Styles ===== */
+
+.error-boundary-container {
+  text-align: center;
+  color: white;
+  background-color: #181818;
+  padding: 50px;
+  min-height: 100vh;
+}
+
+.error-message {
+  color: #ffb4b4;
+  background-color: #222;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  text-align: left;
+}
+
+.error-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: gold;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
