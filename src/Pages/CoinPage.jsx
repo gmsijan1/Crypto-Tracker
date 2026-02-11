@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { SingleCoin } from "../config/api";
-import CoinInfo from "../components/CoinInfo";
 import Header from "../components/Header";
 import { CryptoState } from "../CryptoContext";
+
+const CoinInfo = lazy(() => import("../components/CoinInfo"));
 
 const CoinPage = () => {
   const { id } = useParams();
@@ -18,11 +19,8 @@ const CoinPage = () => {
     const fetchCoin = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const { data } = await axios.get(SingleCoin(id));
-        console.log("Fetched coin data:", data);
-
         setCoin(data);
       } catch (err) {
         setError(err);
@@ -30,36 +28,12 @@ const CoinPage = () => {
         setLoading(false);
       }
     };
-
     fetchCoin();
   }, [id]);
 
-  // Explicit render states
   if (loading) return <div>Loading coin...</div>;
-  if (error) {
-    const isCORS =
-      error.message.includes("CORS") || error.code === "ERR_NETWORK";
-    const isRateLimit = error.response?.status === 429;
-
-    let message =
-      "Failed to load coin data. This is likely an API limitation, not a bug in the app.";
-    if (isCORS)
-      message +=
-        " The request was blocked by CORS policy. Consider using a backend proxy.";
-    if (isRateLimit)
-      message +=
-        " Too many requests were made to the API. Please wait and try again later.";
-
-    return <div className="error-container">{message}</div>;
-  }
+  if (error) return <div>Error loading coin</div>;
   if (!coin) return <div>No coin data available</div>;
-
-  const currentPrice = Number(
-    coin.market_data?.current_price?.usd ?? 0,
-  ).toFixed(2);
-  const marketCap = Number(
-    coin.market_data?.market_cap?.usd ?? 0,
-  ).toLocaleString();
 
   return (
     <>
@@ -70,13 +44,15 @@ const CoinPage = () => {
         <h3>Rank: {coin.market_cap_rank ?? "N/A"}</h3>
         <h3>
           Current Price: {symbol}
-          {currentPrice}
+          {Number(coin.market_data?.current_price?.usd ?? 0).toFixed(2)}
         </h3>
         <h3>
           Market Cap: {symbol}
-          {marketCap}
+          {Number(coin.market_data?.market_cap?.usd ?? 0).toLocaleString()}
         </h3>
-        <CoinInfo coinId={id} />
+        <Suspense fallback={<div>Loading charts...</div>}>
+          <CoinInfo coinId={id} />
+        </Suspense>
       </div>
     </>
   );

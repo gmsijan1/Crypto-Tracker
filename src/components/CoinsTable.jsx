@@ -1,52 +1,18 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CryptoState } from "../CryptoContext";
-
-const DEBOUNCE_MS = 300;
+import useDebounce from "../hooks/useDebounce";
+import useFetchCoins from "../hooks/useFetchCoins";
 
 const CoinsTable = () => {
-  const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const { coins, loading, error } = useFetchCoins();
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("rank");
 
+  const debouncedSearch = useDebounce(search, 300);
   const { symbol } = CryptoState();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const id = window.setTimeout(() => setDebouncedSearch(search), DEBOUNCE_MS);
-    return () => window.clearTimeout(id);
-  }, [search]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, sortBy]);
-  const fetchCoins = async () => {
-    try {
-      setLoading(true);
-      setError(false);
-      const { data } = await axios.get(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false",
-      );
-      if (!data || data.length === 0) {
-        setError(true);
-      }
-      setCoins(data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setError(true);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCoins();
-  }, []);
 
   const filteredAndSortedCoins = () => {
     const filtered = coins.filter(
@@ -56,15 +22,9 @@ const CoinsTable = () => {
     );
 
     return [...filtered].sort((a, b) => {
-      if (sortBy === "rank") {
-        return a.market_cap_rank - b.market_cap_rank;
-      }
-      if (sortBy === "name") {
-        return a.name.localeCompare(b.name);
-      }
-      if (sortBy === "price") {
-        return b.current_price - a.current_price;
-      }
+      if (sortBy === "rank") return a.market_cap_rank - b.market_cap_rank;
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "price") return b.current_price - a.current_price;
       return 0;
     });
   };
@@ -83,12 +43,10 @@ const CoinsTable = () => {
       <div className="table-controls">
         <input
           className="search-input"
-          type="text"
-          placeholder=" Search coins..."
+          placeholder="Search coins..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-
         <select
           className="sort-select"
           value={sortBy}
@@ -134,12 +92,10 @@ const CoinsTable = () => {
                   />
                   {coin.name} ({coin.symbol.toUpperCase()})
                 </td>
-
                 <td>
                   {symbol}
                   {coin.current_price?.toFixed(2) ?? "0.00"}
                 </td>
-
                 <td
                   className={
                     coin.price_change_percentage_24h >= 0 ? "profit" : "loss"
@@ -148,7 +104,6 @@ const CoinsTable = () => {
                   {coin.price_change_percentage_24h >= 0 ? "+" : ""}
                   {coin.price_change_percentage_24h?.toFixed(2) ?? "0.00"}%
                 </td>
-
                 <td>
                   {symbol}
                   {Math.round(coin.market_cap / 1_000_000).toLocaleString()}M
@@ -161,23 +116,20 @@ const CoinsTable = () => {
 
       {!error && displayedCoins.length > 0 && (
         <div className="pagination-container">
-          {Array.from(
-            {
-              length: Math.ceil(filteredAndSortedCoins().length / 10),
-            },
-            (_, i) => (
-              <button
-                key={i + 1}
-                onClick={() => {
-                  setPage(i + 1);
-                  window.scrollTo(0, 0);
-                }}
-                className={`pagination-btn ${i + 1 === page ? "active" : ""}`}
-              >
-                {i + 1}
-              </button>
-            ),
-          )}
+          {Array.from({
+            length: Math.ceil(filteredAndSortedCoins().length / 10),
+          }).map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => {
+                setPage(i + 1);
+                window.scrollTo(0, 0);
+              }}
+              className={`pagination-btn ${i + 1 === page ? "active" : ""}`}
+            >
+              {i + 1}
+            </button>
+          ))}
         </div>
       )}
     </div>

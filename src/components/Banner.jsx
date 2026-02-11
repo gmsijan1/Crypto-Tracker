@@ -32,12 +32,10 @@ export default function Banner() {
               className="banner-coin-link"
             >
               <img src={coin.image} alt={coin.name} height="90" />
-              <span>
-                {coin.symbol}{" "}
-                <span className={`price-change ${profit ? "profit" : "loss"}`}>
-                  {profit && "+"}
-                  {priceChange.toFixed(2)}%
-                </span>
+              <span>{coin.symbol}</span>
+              <span className={`price-change ${profit ? "profit" : "loss"}`}>
+                {profit && "+"}
+                {priceChange.toFixed(2)}%
               </span>
               <span>
                 {symbol}
