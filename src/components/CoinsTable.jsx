@@ -12,9 +12,9 @@ const CoinsTable = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState("rank"); // ✅ added
+  const [sortBy, setSortBy] = useState("rank");
 
-  const { currency, symbol } = CryptoState();
+  const { symbol } = CryptoState();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,8 +24,7 @@ const CoinsTable = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, sortBy]); // ✅ reset page on sort
-
+  }, [debouncedSearch, sortBy]);
   const fetchCoins = async () => {
     try {
       setLoading(true);
@@ -49,7 +48,6 @@ const CoinsTable = () => {
     fetchCoins();
   }, []);
 
-  // ✅ search + sort (no mutation)
   const filteredAndSortedCoins = () => {
     const filtered = coins.filter(
       (coin) =>
@@ -82,24 +80,25 @@ const CoinsTable = () => {
     <div className="coins-table-container">
       <h2>Cryptocurrency Prices by Market Cap</h2>
 
-      <input
-        className="search-input"
-        type="text"
-        placeholder=" Search coins..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="table-controls">
+        <input
+          className="search-input"
+          type="text"
+          placeholder=" Search coins..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-      {/* ✅ sort control */}
-      <select
-        className="sort-select"
-        value={sortBy}
-        onChange={(e) => setSortBy(e.target.value)}
-      >
-        <option value="rank">Sort by Rank</option>
-        <option value="name">Sort by Name</option>
-        <option value="price">Sort by Price</option>
-      </select>
+        <select
+          className="sort-select"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          <option value="rank">Sort by Rank</option>
+          <option value="name">Sort by Name</option>
+          <option value="price">Sort by Price</option>
+        </select>
+      </div>
 
       <table>
         <thead>
