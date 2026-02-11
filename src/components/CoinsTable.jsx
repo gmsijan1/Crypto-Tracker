@@ -8,10 +8,11 @@ const DEBOUNCE_MS = 300;
 const CoinsTable = () => {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false); // new
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("rank"); // ✅ added
 
   const { currency, symbol } = CryptoState();
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const CoinsTable = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, sortBy]); // ✅ reset page on sort
 
   const fetchCoins = async () => {
     try {
@@ -48,20 +49,39 @@ const CoinsTable = () => {
     fetchCoins();
   }, []);
 
-  const handleSearch = () =>
-    coins.filter(
+  // ✅ search + sort (no mutation)
+  const filteredAndSortedCoins = () => {
+    const filtered = coins.filter(
       (coin) =>
         coin.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         coin.symbol.toLowerCase().includes(debouncedSearch.toLowerCase()),
     );
 
-  const displayedCoins = handleSearch().slice((page - 1) * 10, page * 10);
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "rank") {
+        return a.market_cap_rank - b.market_cap_rank;
+      }
+      if (sortBy === "name") {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === "price") {
+        return b.current_price - a.current_price;
+      }
+      return 0;
+    });
+  };
+
+  const displayedCoins = filteredAndSortedCoins().slice(
+    (page - 1) * 10,
+    page * 10,
+  );
 
   if (loading) return <div>Loading coins...</div>;
 
   return (
     <div className="coins-table-container">
       <h2>Cryptocurrency Prices by Market Cap</h2>
+
       <input
         className="search-input"
         type="text"
@@ -69,6 +89,17 @@ const CoinsTable = () => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
+      {/* ✅ sort control */}
+      <select
+        className="sort-select"
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+      >
+        <option value="rank">Sort by Rank</option>
+        <option value="name">Sort by Name</option>
+        <option value="price">Sort by Price</option>
+      </select>
 
       <table>
         <thead>
@@ -109,6 +140,7 @@ const CoinsTable = () => {
                   {symbol}
                   {coin.current_price?.toFixed(2) ?? "0.00"}
                 </td>
+
                 <td
                   className={
                     coin.price_change_percentage_24h >= 0 ? "profit" : "loss"
@@ -117,6 +149,7 @@ const CoinsTable = () => {
                   {coin.price_change_percentage_24h >= 0 ? "+" : ""}
                   {coin.price_change_percentage_24h?.toFixed(2) ?? "0.00"}%
                 </td>
+
                 <td>
                   {symbol}
                   {Math.round(coin.market_cap / 1_000_000).toLocaleString()}M
@@ -130,7 +163,9 @@ const CoinsTable = () => {
       {!error && displayedCoins.length > 0 && (
         <div className="pagination-container">
           {Array.from(
-            { length: Math.ceil(handleSearch().length / 10) },
+            {
+              length: Math.ceil(filteredAndSortedCoins().length / 10),
+            },
             (_, i) => (
               <button
                 key={i + 1}
