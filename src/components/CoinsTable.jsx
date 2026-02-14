@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CryptoState } from "../CryptoContext";
 import useDebounce from "../hooks/useDebounce";
@@ -15,7 +15,7 @@ const CoinsTable = () => {
   const { symbol } = CryptoState();
   const navigate = useNavigate();
 
-  const filteredAndSortedCoins = () => {
+  const filteredAndSortedCoins = useMemo(() => {
     const filtered = coins.filter(
       (coin) =>
         coin.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -28,12 +28,37 @@ const CoinsTable = () => {
       if (sortBy === "price") return b.current_price - a.current_price;
       return 0;
     });
-  };
+  }, [coins, debouncedSearch, sortBy]);
 
-  const displayedCoins = filteredAndSortedCoins().slice(
-    (page - 1) * 10,
-    page * 10,
+  const displayedCoins = useMemo(
+    () => filteredAndSortedCoins.slice((page - 1) * 10, page * 10),
+    [filteredAndSortedCoins, page],
   );
+
+  const totalPages = useMemo(
+    () => Math.ceil(filteredAndSortedCoins.length / 10),
+    [filteredAndSortedCoins.length],
+  );
+
+  const handleSearchChange = useCallback((event) => {
+    setSearch(event.target.value);
+  }, []);
+
+  const handleSortChange = useCallback((event) => {
+    setSortBy(event.target.value);
+  }, []);
+
+  const handleRowClick = useCallback(
+    (coinId) => {
+      navigate(`/coins/${coinId}`);
+    },
+    [navigate],
+  );
+
+  const handlePageClick = useCallback((newPage) => {
+    setPage(newPage);
+    window.scrollTo(0, 0);
+  }, []);
 
   if (loading)
     return (
@@ -54,12 +79,12 @@ const CoinsTable = () => {
           className="search-input"
           placeholder="Search coins..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
         />
         <select
           className="sort-select"
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+          onChange={handleSortChange}
         >
           <option value="rank">Sort by Rank</option>
           <option value="name">Sort by Name</option>
@@ -101,7 +126,7 @@ const CoinsTable = () => {
             </tr>
           ) : (
             displayedCoins.map((coin) => (
-              <tr key={coin.id} onClick={() => navigate(`/coins/${coin.id}`)}>
+              <tr key={coin.id} onClick={() => handleRowClick(coin.id)}>
                 <td>
                   <img
                     src={coin.image}
@@ -135,15 +160,10 @@ const CoinsTable = () => {
 
       {!error && displayedCoins.length > 0 && (
         <div className="pagination-container">
-          {Array.from({
-            length: Math.ceil(filteredAndSortedCoins().length / 10),
-          }).map((_, i) => (
+          {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i + 1}
-              onClick={() => {
-                setPage(i + 1);
-                window.scrollTo(0, 0);
-              }}
+              onClick={() => handlePageClick(i + 1)}
               className={`pagination-btn ${i + 1 === page ? "active" : ""}`}
             >
               {i + 1}

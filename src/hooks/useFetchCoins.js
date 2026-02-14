@@ -9,7 +9,10 @@ export default function useFetchCoins(currency = "usd") {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchCoins = async () => {
+    const fetchCoins = async (retryCount = 0) => {
+      const maxRetries = 3;
+      const baseDelay = 1000; // 1 second
+
       try {
         setLoading(true);
         setError(false);
@@ -22,13 +25,30 @@ export default function useFetchCoins(currency = "usd") {
         }
       } catch (err) {
         console.error("Error fetching coins:", err.message);
-        if (isMounted) {
-          setError(true);
+
+        // Retry logic with exponential backoff
+        if (retryCount < maxRetries && isMounted) {
+          const delay = baseDelay * Math.pow(2, retryCount);
+          console.log(
+            `Retrying in ${delay}ms... (Attempt ${retryCount + 1}/${maxRetries})`,
+          );
+          setTimeout(() => {
+            if (isMounted) {
+              fetchCoins(retryCount + 1);
+            }
+          }, delay);
+        } else {
+          // All retries exhausted
+          if (isMounted) {
+            setError(true);
+            setLoading(false);
+          }
         }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        return;
+      }
+
+      if (isMounted) {
+        setLoading(false);
       }
     };
 

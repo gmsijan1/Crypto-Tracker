@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
 const SelectButton = ({ children, selected, onClick }) => {
   const baseStyle = {
@@ -32,4 +32,4 @@ const SelectButton = ({ children, selected, onClick }) => {
   );
 };
 
-export default SelectButton;
+export default memo(SelectButton);
