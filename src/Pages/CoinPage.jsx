@@ -9,7 +9,7 @@ const CoinInfo = lazy(() => import("../components/CoinInfo"));
 
 const CoinPage = () => {
   const { id } = useParams();
-  const { symbol } = CryptoState();
+  const { currency, symbol } = CryptoState();
 
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -31,9 +31,60 @@ const CoinPage = () => {
     fetchCoin();
   }, [id]);
 
-  if (loading) return <div>Loading coin...</div>;
-  if (error) return <div>Error loading coin</div>;
-  if (!coin) return <div>No coin data available</div>;
+  const getPrice = () => {
+    const priceKey = currency.toLowerCase();
+    const priceMap = coin?.market_data?.current_price || {};
+    return Number(priceMap[priceKey] || 0).toFixed(2);
+  };
+
+  const getMarketCap = () => {
+    const capKey = currency.toLowerCase();
+    const capMap = coin?.market_data?.market_cap || {};
+    return Number(capMap[capKey] || 0).toLocaleString();
+  };
+
+  if (loading)
+    return (
+      <>
+        <Header />
+        <div className="coin-page-container page-bg">
+          <div className="coin-loading">
+            <p className="loading-spinner">⏳</p>
+            <p>Loading coin data...</p>
+          </div>
+        </div>
+      </>
+    );
+
+  if (error)
+    return (
+      <>
+        <Header />
+        <div className="coin-page-container page-bg">
+          <div className="coin-error">
+            <p className="error-icon">⚠️</p>
+            <p className="error-title">Unable to Load Coin</p>
+            <p className="error-message">
+              The CoinGecko API is temporarily unavailable or rate-limited.
+              Please try again in a few moments.
+            </p>
+          </div>
+        </div>
+      </>
+    );
+
+  if (!coin)
+    return (
+      <>
+        <Header />
+        <div className="coin-page-container page-bg">
+          <div className="coin-empty">
+            <p className="empty-icon">🪙</p>
+            <p>No coin data available.</p>
+          </div>
+        </div>
+      </>
+    );
 
   return (
     <>
@@ -44,11 +95,11 @@ const CoinPage = () => {
         <h3>Rank: {coin.market_cap_rank ?? "N/A"}</h3>
         <h3>
           Current Price: {symbol}
-          {Number(coin.market_data?.current_price?.usd ?? 0).toFixed(2)}
+          {getPrice()}
         </h3>
         <h3>
           Market Cap: {symbol}
-          {Number(coin.market_data?.market_cap?.usd ?? 0).toLocaleString()}
+          {getMarketCap()}
         </h3>
         <Suspense fallback={<div>Loading charts...</div>}>
           <CoinInfo coinId={id} />

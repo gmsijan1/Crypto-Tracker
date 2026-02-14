@@ -1,14 +1,19 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const Crypto = createContext();
 
-const CryptoWrapper = ({ children }) => {
-  const [currency, setCurrency] = useState("USD");
-  const [symbol, setSymbol] = useState("₹");
+const currencySymbols = {
+  usd: "$",
+  eur: "€",
+  gbp: "£",
+  inr: "₹",
+  jpy: "¥",
+  aud: "A$",
+};
 
-  useEffect(() => {
-    setSymbol(currency === "USD" ? "$" : "₹");
-  }, [currency]);
+const CryptoWrapper = ({ children }) => {
+  const [currency, setCurrency] = useState("usd");
+  const symbol = currencySymbols[currency.toLowerCase()] || "$";
 
   return (
     <Crypto.Provider value={{ currency, setCurrency, symbol }}>

@@ -5,7 +5,8 @@ import useDebounce from "../hooks/useDebounce";
 import useFetchCoins from "../hooks/useFetchCoins";
 
 const CoinsTable = () => {
-  const { coins, loading, error } = useFetchCoins();
+  const { currency } = CryptoState();
+  const { coins, loading, error } = useFetchCoins(currency);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("rank");
@@ -34,7 +35,15 @@ const CoinsTable = () => {
     page * 10,
   );
 
-  if (loading) return <div>Loading coins...</div>;
+  if (loading)
+    return (
+      <div className="coins-table-container">
+        <div className="table-loading">
+          <p className="loading-spinner">⏳</p>
+          <p>Loading coins...</p>
+        </div>
+      </div>
+    );
 
   return (
     <div className="coins-table-container">
@@ -69,15 +78,25 @@ const CoinsTable = () => {
         </thead>
         <tbody>
           {error ? (
-            <tr>
-              <td colSpan="4" style={{ color: "red", textAlign: "center" }}>
-                Failed to load coins from API
+            <tr className="error-row">
+              <td colSpan="4">
+                <div className="table-error">
+                  <p className="error-icon">⚠️</p>
+                  <p className="error-title">Failed to Load Coins</p>
+                  <p className="error-message">
+                    The CoinGecko API is temporarily unavailable or
+                    rate-limited. Please refresh the page.
+                  </p>
+                </div>
               </td>
             </tr>
           ) : displayedCoins.length === 0 ? (
-            <tr>
-              <td colSpan="4" style={{ color: "orange", textAlign: "center" }}>
-                No coins match your search
+            <tr className="empty-row">
+              <td colSpan="4">
+                <div className="table-empty">
+                  <p className="search-icon">🔍</p>
+                  <p>No coins match your search</p>
+                </div>
               </td>
             </tr>
           ) : (

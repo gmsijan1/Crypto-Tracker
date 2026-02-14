@@ -30,6 +30,8 @@ export default function CoinInfo({ coinId }) {
   const { currency } = CryptoState();
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchChartData = async () => {
       try {
         setLoading(true);
@@ -38,16 +40,27 @@ export default function CoinInfo({ coinId }) {
         const { data } = await axios.get(
           HistoricalChart(coinId, days, currency),
         );
-        setPrices(data.prices);
+        if (isMounted) {
+          setPrices(data.prices);
+        }
       } catch (err) {
-        setError(true);
-        setPrices([]);
+        console.error("Error fetching chart data:", err.message);
+        if (isMounted) {
+          setError(true);
+          setPrices([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchChartData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [coinId, currency, days]);
 
   const chartData = {
@@ -66,13 +79,24 @@ export default function CoinInfo({ coinId }) {
   return (
     <div className="coin-info-container">
       {loading ? (
-        <p>Loading chart...</p>
+        <div className="chart-loading">
+          <p className="loading-spinner">⏳</p>
+          <p>Fetching chart data...</p>
+        </div>
       ) : error ? (
-        <p className="error-text">
-          Failed to load chart data. Data is fetched from a public API.
-        </p>
+        <div className="chart-error">
+          <p className="error-icon">⚠️</p>
+          <p className="error-title">Unable to Load Chart</p>
+          <p className="error-message">
+            The CoinGecko API is temporarily unavailable or rate-limited. Please
+            try again in a few moments.
+          </p>
+        </div>
       ) : prices.length === 0 ? (
-        <p>No chart data available.</p>
+        <div className="chart-empty">
+          <p className="empty-icon">📊</p>
+          <p>No chart data available for this coin.</p>
+        </div>
       ) : (
         <Line data={chartData} />
       )}
@@ -83,6 +107,7 @@ export default function CoinInfo({ coinId }) {
             key={d}
             onClick={() => setDays(d)}
             className={`chart-btn ${days === d ? "active" : ""}`}
+            disabled={loading || error}
           >
             {d === 1 ? "24H" : d === 30 ? "30D" : d === 90 ? "3M" : "1Y"}
           </button>
